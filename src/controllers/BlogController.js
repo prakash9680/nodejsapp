@@ -11,7 +11,9 @@ const create = async (req, res) => {
             req.body.tags = (req.body.tags).split(",");
             const blog = new Blog(req.body);
             blog.authorId = req.user._id;
-            blog.image = req.file.filename;
+            if (req.file != null) {
+                blog.image = req.file.filename;
+            }
             blog.save().then((data) => {
                 sendResponse(res, 201, 'succes', { blog: data });
             }).catch((error) => {
@@ -36,15 +38,19 @@ const update = async (req, res) => {
                 formData.image = req.file.filename;
             }
             Blog.findOne({ _id: id }).then(async (data) => {
-                if (req.file != null) {
-                    if (req.file.filename != data.image) {
-                        let imageName = (data.image).replace(process.env.BLOG_IMAGE_URL, '');
-                        if (fs.existsSync(process.env.BLOG_UPLOAD + '/' + imageName)) {
-                            fs.unlinkSync(process.env.BLOG_UPLOAD + '/' + imageName, (err) => {
-                                sendResponse(res, 400, 'error file deleting');
-                            })
+                try {
+                    if (req.file != null) {
+                        if (req.file.filename != data.image) {
+                            let imageName = (data.image).replace(process.env.BLOG_IMAGE_URL, '');
+                            if (fs.existsSync(process.env.BLOG_UPLOAD + '/' + imageName)) {
+                                fs.unlinkSync(process.env.BLOG_UPLOAD + '/' + imageName, (err) => {
+                                    sendResponse(res, 400, 'error file deleting');
+                                })
+                            }
                         }
                     }
+                } catch(error) {
+                    
                 }
                 formData.authorId = data.authorId;
                 formData.tags = (formData.tags).split(",");

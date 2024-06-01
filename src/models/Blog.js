@@ -12,21 +12,23 @@ const userSchema = new Schema({
         required: true,
     },
     authorId: {
-        type: String
+        type: String,
+        required: true
     },
     tags: {
-        type: Array,
-        required: true,
+        type: Array
     },
     image: {
         type: String,
-        required: true,
         get: getBlogImageUrl,
     }
 }, { toJSON: { getters: true, setters: true} });
 
 function getBlogImageUrl(value) {
-    return process.env.BLOG_IMAGE_URL + value;
+    if (value) {
+        return process.env.BLOG_IMAGE_URL + value;
+    }
+    return '';
 }
 const User = mongoose.model("blog", userSchema);
 
